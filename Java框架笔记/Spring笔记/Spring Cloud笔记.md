@@ -1891,7 +1891,7 @@ zuul:
     prefix: /kuagn # 设置公共的前缀,实现隐藏原有路由
 ```
 
-![[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(https://gitee.com/xudongyin/img/raw/master/img/20200824171218.png)(C:\Users\dell\AppData\Roaming\Typora\typora-user-images\image-20200520211031365.png)]](https://www.icode9.com/img/ll/?i=20200521132228379.png#pic_center)
+![](https://gitee.com/xudongyin/img/raw/master/img/20200824200217.png)
 
 **主启动类**
 
@@ -2053,7 +2053,7 @@ HTTP服务具有以下格式的资源：
 
 ```xml
 <!--config-->
-<!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-start
+<!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-start -->
 <dependency>
     <groupId>org.springframework.cloud</groupId>
     <artifactId>spring-cloud-starter-config</artifactId>
@@ -2136,6 +2136,102 @@ public class ConfigClient {
 访问：http://localhost:8201/config/
 
 ![在这里插入图片描述](https://gitee.com/xudongyin/img/raw/master/img/20200824171412.png)
+
+**小案例**
+
+本地新建config-dept.yml和config-eureka.yml并提交到码云仓库
+
+![在这里插入图片描述](https://gitee.com/xudongyin/img/raw/master/img/20200824195933.png)
+
+![在这里插入图片描述](https://gitee.com/xudongyin/img/raw/master/img/20200824195939.png)
+
+这里配置文件内容不再列举直接到代码中看把。
+
+新建springcloud-config-eureka-7001模块，并将原来的springcloud-eureka-7001模块下的内容拷贝的该模块。
+
+1.清空该模块的application.yml配置，并新建bootstrap.yml连接远程配置
+
+```yml
+spring:
+  cloud:
+    config:
+      name: config-eureka # 仓库中的配置文件名称
+      label: master
+      profile: dev
+      uri: http://localhost:3344
+```
+
+2.在pom.xml中添加spring cloud config依赖
+
+```xml
+<!--config-->
+<!-- https://mvnrepository.com/artifact/org.springframework.cloud/spring-cloud-starter-config -->
+<dependency>
+    <groupId>org.springframework.cloud</groupId>
+    <artifactId>spring-cloud-starter-config</artifactId>
+    <version>2.1.1.RELEASE</version>
+</dependency>
+```
+
+3.主启动类
+
+```java
+@SpringBootApplication
+@EnableEurekaServer //EnableEurekaServer 服务端的启动类，可以接受别人注册进来~
+public class ConfigEurekaServer_7001 {
+    public static void main(String[] args) {
+        SpringApplication.run(ConfigEurekaServer_7001.class,args);
+    }
+}
+```
+
+4.测试
+
+第一步：启动 Config_Server_3344，并访问 http://localhost:3344/master/config-eureka-dev.yml 测试
+
+![在这里插入图片描述](https://gitee.com/xudongyin/img/raw/master/img/20200824195944.png)
+第二部：启动ConfigEurekaServer_7001，访问 http://localhost:7001/ 测试
+
+![在这里插入图片描述](https://gitee.com/xudongyin/img/raw/master/img/20200824195948.png)
+显示上图则成功
+
+新建springcloud-config-dept-8001模块并拷贝springcloud-provider-dept-8001的内容
+
+同理导入spring cloud config依赖、清空application.yml 、新建bootstrap.yml配置文件并配置
+
+```yml
+spring:
+  cloud:
+    config:
+      name: config-dept
+      label: master
+      profile: dev
+      uri: http://localhost:3344
+```
+
+主启动类
+
+```java
+@SpringBootApplication
+@EnableEurekaClient //在服务启动后自动注册到Eureka中！
+@EnableDiscoveryClient //服务发现~
+@EnableCircuitBreaker //
+public class ConfigDeptProvider_8001 {
+    public static void main(String[] args) {
+        SpringApplication.run(ConfigDeptProvider_8001.class,args);
+    }
+
+    //增加一个 Servlet
+    @Bean
+    public ServletRegistrationBean hystrixMetricsStreamServlet(){
+        ServletRegistrationBean registrationBean = new ServletRegistrationBean(new HystrixMetricsStreamServlet());
+        registrationBean.addUrlMappings("/actuator/hystrix.stream");
+        return registrationBean;
+    }
+}
+```
+
+测试 (略)
 
 ### 服务跟踪
 
