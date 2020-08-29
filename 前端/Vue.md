@@ -1612,7 +1612,7 @@ define(function(require,exports,module){
 - Sea.js
 - coolie
 
-#### ES6模块
+#### **ES6模块**
 
 ------
 
@@ -1638,7 +1638,118 @@ module "localModule"{}
 
 - Babel
 
-  **大家期望的模块**
+一、简介  
+
+Babel是一个广泛使用的转码器，可以将ES6代码转为ES5代码，从而在现有环境执行执行。
+
+这意味着，你可以现在就用 ES6 编写程序，而不用担心现有环境是否支持。
+
+二、安装
+
+安装命令行转码工具
+
+Babel提供babel-cli工具，用于命令行转码。它的安装命令如下：
+
+```bash
+npm install --global babel-cli
+
+#查看是否安装成功
+babel --version
+```
+
+三、Babel的使用
+
+1、初始化项目
+
+```bash
+npm init -y
+```
+
+2、创建文件
+
+src/example.js
+
+下面是一段ES6代码：
+
+```js
+// 转码前
+// 定义数据
+let input = [1, 2, 3]
+// 将数组的每个元素 +1
+input = input.map(item => item + 1)
+console.log(input)
+```
+
+2、配置.babelrc
+
+Babel的配置文件是.babelrc，存放在项目的根目录下，该文件用来设置转码规则和插件，基本格式如下。
+
+```js
+{
+    "presets": [],
+    "plugins": []
+}
+```
+
+presets字段设定转码规则，将es2015规则加入 .babelrc：
+
+```js
+{
+    "presets": ["es2015"],
+    "plugins": []
+}
+```
+
+3、安装转码器
+
+在项目中安装
+
+```bash
+npm install --save-dev babel-preset-es2015
+```
+
+4、转码
+
+```bash
+# 转码结果写入一个文件
+mkdir dist1
+# --out-file 或 -o 参数指定输出文件
+babel src/example.js --out-file dist1/compiled.js
+# 或者
+babel src/example.js -o dist1/compiled.js
+
+# 整个目录转码
+mkdir dist2
+# --out-dir 或 -d 参数指定输出目录
+babel src --out-dir dist2
+# 或者
+babel src -d dist2
+```
+
+5、自定义脚本
+
+改写package.json：
+
+```js
+{
+    // ...
+    "scripts": {
+        // ...
+        "build":  "babel src\\example.js -o dist\\compiled.js"
+    },
+}
+```
+
+转码的时候，执行下面的命令：
+
+```bash
+mkdir dist
+npm run build
+```
+
+ 
+
+ **大家期望的模块**
   系统可以兼容多种模块风格， 尽量可以利用已有的代码， 不仅仅只是JavaScript模块化， 还有CSS、图片、字体等资源也需要模块化。
 
 ### 安装Webpack
@@ -1664,7 +1775,7 @@ webpack-cli -v
 
   创建 `webpack.config.js`配置文件
 
-- entry：入口文件， 指定Web Pack用哪个文件作为项目的入口
+- entry：入口文件， 指定Web Pack用哪个文件作为项目的入口，也就是引用了很多 js 文件的文件
 - output：输出， 指定WebPack把处理完成的文件放置到指定路径
 - module：模块， 用于处理各种类型的文件
 - plugins：插件， 如：热更新、代码重用等
@@ -1673,10 +1784,10 @@ webpack-cli -v
 
 ```js
 module.exports = {
-	entry:"",
+	entry: './src/main.js', //配置入口文件
 	output:{
-		path:"",
-		filename:""
+		path:path.resolve(__dirname, './dist'), //输出路径，__dirname：当前文件所在路径
+		 filename: 'bundle.js' //输出文件
 	},
 	module:{
 		loaders:[
@@ -1690,6 +1801,63 @@ module.exports = {
 ```
 
   直接运行`webpack`命令打包
+
+**CSS打包**
+
+**1、安装style-loader和 css-loader**
+
+Webpack 本身只能处理 JavaScript 模块，如果要处理其他类型的文件，就需要使用 loader 进行转换。Loader 可以理解为是模块和资源的转换器。
+
+首先我们需要安装相关Loader插件，css-loader 是将 css 装载到 javascript；style-loader 是让 javascript 认识css
+
+```bash
+npm install --save-dev style-loader css-loader 
+```
+
+**2、修改webpack.config.js**
+
+```js
+const path = require("path"); //Node.js内置模块
+module.exports = {
+    entry: './src/main.js', //配置入口文件
+	output:{
+		path:path.resolve(__dirname, './dist'), //输出路径，__dirname：当前文件所在路径
+		 filename: 'bundle.js' //输出文件
+	},
+    module: {
+        rules: [  
+            {  
+                test: /\.css$/,    //打包规则应用到以css结尾的文件上
+                use: ['style-loader', 'css-loader']
+            }  
+        ]  
+    }
+}
+```
+
+**3、在src文件夹创建style.css**
+
+```css
+body{
+    background:pink;
+}
+```
+
+**4、修改main.js** 
+
+在第一行引入style.css
+
+```js
+require('./style.css');
+```
+
+**5、运行编译命令**
+
+```bash
+webpack #有黄色警告
+webpack --mode=development #没有警告
+#执行后查看bundle.js 里面包含了上面两个js文件的内容并惊醒了代码压缩
+```
 
 ### 使用webpack
 

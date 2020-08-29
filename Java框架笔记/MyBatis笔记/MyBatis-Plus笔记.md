@@ -642,6 +642,24 @@ void contextLoads() {
 
 十分重要：**Wrapper**
 
+#### **wapper介绍** 
+
+![img](https://gitee.com/xudongyin/img/raw/master/img/20200826215808.png)
+
+Wrapper ： 条件构造抽象类，最顶端父类
+
+  AbstractWrapper ： 用于查询条件封装，生成 sql 的 where 条件
+
+​    QueryWrapper ： Entity 对象封装操作类，不是用lambda语法
+
+​    UpdateWrapper ： Update 条件封装，用于Entity对象更新操作
+
+  AbstractLambdaWrapper ： Lambda 语法使用 Wrapper统一处理解析 lambda 获取 column。
+
+​    LambdaQueryWrapper ：看名称也能明白就是用于Lambda语法使用的查询Wrapper
+
+​    LambdaUpdateWrapper ： Lambda 更新封装Wrapper
+
 我们写一些复杂的sql就可以使用它来替代！
 
 ![img](https://gitee.com/xudongyin/img/raw/master/img/1905053-20200512100527243-1296762191.png)
@@ -708,6 +726,7 @@ void contextLoads() {
     void test5() {
         QueryWrapper<User> wrapper = new QueryWrapper<>();
         // id 在子查询中查出来
+        // inSql("id", "select id from table where id < 3")--->id in (select id from table where id < 3)
         wrapper.inSql("id", "select id from user where id<3");
         List<Object> objects = userMapper.selectObjs(wrapper);
         objects.forEach(System.out::println);
@@ -729,7 +748,64 @@ void contextLoads() {
     }
 ```
 
-> 其余的测试，可以自己下去多练习！
+7、or、and
+
+**注意：**这里使用的是 UpdateWrapper 
+
+不调用`or`则默认为使用 `and `连
+
+```java
+@Test
+public void testUpdate1() {
+    //修改值
+    User user = new User();
+    user.setAge(99);
+    user.setName("Andy");
+
+    //修改条件
+    UpdateWrapper<User> userUpdateWrapper = new UpdateWrapper<>();
+    userUpdateWrapper
+        .like("name", "h")
+        .or()
+        .between("age", 20, 30);
+
+    int result = userMapper.update(user, userUpdateWrapper);
+
+    System.out.println(result);
+}
+```
+
+UPDATE user SET name=?, age=?, update_time=? WHERE deleted=0 AND name LIKE ? OR age BETWEEN ? AND ?
+
+8、嵌套or、嵌套and
+
+这里使用了lambda表达式，or中的表达式最后翻译成sql时会被加上圆括号
+
+```java
+@Test
+public void testUpdate2() {
+    //修改值
+    User user = new User();
+    user.setAge(99);
+    user.setName("Andy");
+
+    //修改条件
+    UpdateWrapper<User> userUpdateWrapper = new UpdateWrapper<>();
+    userUpdateWrapper
+        .like("name", "h")
+        .or(i -> i.eq("name", "李白").ne("age", 20));
+
+    int result = userMapper.update(user, userUpdateWrapper);
+
+    System.out.println(result);
+}
+```
+
+UPDATE user SET name=?, age=?, update_time=? 
+
+WHERE deleted=0 AND name LIKE ? 
+
+OR ( name = ? AND age <> ? ) 
 
 ## **3.11、代码自动生成器**
 
