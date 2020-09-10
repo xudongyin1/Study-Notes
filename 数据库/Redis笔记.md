@@ -271,6 +271,14 @@ master-slave(主从)同步。
 
    
 
+> 缺点
+
+1. 不适合存储重要的数据（财务类等）
+
+2. 不适合存储经常修改的数据
+
+   
+
 ### Windows安装
 
 1 、下载安装包：[https://github.com/dmajkic/redis/releases](https://links.jianshu.com/go?to=https%3A%2F%2Fgithub.com%2Fdmajkic%2Fredis%2Freleases)

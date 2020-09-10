@@ -7025,12 +7025,12 @@ lettuce : 采用netty，实例可以在多个线程中进行共享，不存在�
 
 源码分析：
 
-```tsx
+```java
 @Bean
 // 我们可以自己定义一个redisTemplate来替换这个默认的！
 @ConditionalOnMissingBean(name = "redisTemplate") 
 public RedisTemplate<Object, Object> redisTemplate(RedisConnectionFactory     													isConnectionFactory)
-throws UnknownHostException {
+    throws UnknownHostException {
     // 默认的 RedisTemplate 没有过多的设置，redis 对象都是需要序列化！
     // 两个泛型都是 Object, Object 的类型，我们后使用需要强制转换 <String, Object>
     RedisTemplate<Object, Object> template = new RedisTemplate<>();
@@ -7042,7 +7042,7 @@ throws UnknownHostException {
 // 由于 String 是redis中最常使用的类型，所以说单独提出来了一个bean！
 public StringRedisTemplate stringRedisTemplate(RedisConnectionFactory
                                                redisConnectionFactory)
-throws UnknownHostException {
+    throws UnknownHostException {
     StringRedisTemplate template = new StringRedisTemplate();
     template.setConnectionFactory(redisConnectionFactory);
     return template;
