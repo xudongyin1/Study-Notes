@@ -1,4 +1,4 @@
-# *MyBatis**
+# MyBatis
 
 半自动化 ORM 框架: Object Relationship Mapping 对象关系映射
 

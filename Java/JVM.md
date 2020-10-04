@@ -1746,4 +1746,4 @@ JDK 9引入了一种新的编译模式AOT(Ahead of Time Compilation)，它是直
 
 注：JIT为方法级，它会缓存编译过的字节码在CodeCache中，而不需要被重复解释。
 
-![image-20200719144135490](https://gitee.com/xudongyin/img/raw/master/img/image-20200719144135490.png)
+![image-20200719144135490](https://gitee.com/xudongyin/img/raw/master/img/image-20200719144135490.png) 

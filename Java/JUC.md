@@ -18,11 +18,11 @@ java.util工具包
 
 **进程** : 一个运行中的程序的集合; 一个进程往往可以包含多个线程,至少包含一个线程
 
-**java默认有几个线程? 两个 main线程 gc线程**
+**java默认有几个线程? 两个， main线程 和 gc线程**
 
 **线程** : 线程（thread）是操作系统能够进行运算调度的最小单位。
 
-对于java而言如何创建thread: **继承自thread,实现runnable接口,实现callable接口**
+对于java而言如何创建thread: **继承自thread,实现runnable接口,实现callable接口,线程池创建**
 
 **Java真的可以开启线程吗**? 开不了的,底层是用native关键词修饰.调用本地实现
 
@@ -79,7 +79,7 @@ private native void start0();
           //获取CPU核数
           //CPU 密集型,IO密集型
           System.out.println(Runtime.getRuntime().availableProcessors());
-      }
+  }
   ~~~
 
 并发编程的本质: **充分利用CPU的资源**
@@ -142,9 +142,9 @@ AbstractQueuedSynchronizer（AQS）使用一个volatile类型的int来作为同�
 
  **锁的独占与共享**
 
-   	java并发包提供的加锁模式分为独占锁和共享锁，独占锁模式下，每次只能有一个线程能持有锁，ReentrantLock就是以独占方式实现的互斥锁。共享锁，则允许多个线程同时获取锁，并发访问 共享资源，如：ReadWriteLock。AQS的内部类Node定义了两个常量SHARED和EXCLUSIVE，他们分别标识 AQS队列中等待线程的锁获取模式。
+   	java并发包提供的加锁模式分为独占锁和共享锁，独占锁模式下，每次只能有一个线程能持有锁，ReentrantLock就是以独占方式实现的互斥锁。共享锁，则允许多个线程同时获取锁，并发访问 共享资源，如：ReadWriteLock。AQS的内部类Node定义了两个常量SHARED（共享）和EXCLUSIVE（独占），他们分别标识 AQS队列中等待线程的锁获取模式。
 
-   	很显然，独占锁是一种悲观保守的加锁策略，它避免了读/读冲突，如果某个只读线程获取锁，则其他读线程都只能等待，这种情况下就限制了不必要的并发性，因为读操作并不会影响数据的一致性。共享锁则是一种乐观锁，它放宽了加锁策略，允许多个执行读操作的线程同时访问共享资源。 java 的并发包中提供了ReadWriteLock，读-写锁。**它允许一个资源可以被多个读操作访问，或者被一个写操作访问，但两者不能同时进行**。
+   	很显然，独占锁是一种悲观保守的加锁策略，它避免了读/写冲突，如果某个只读线程获取锁，则其他读线程都只能等待，这种情况下就限制了不必要的并发性，因为读操作并不会影响数据的一致性。共享锁则是一种乐观锁，它放宽了加锁策略，允许多个执行读操作的线程同时访问共享资源。 java 的并发包中提供了ReadWriteLock，读-写锁。**它允许一个资源可以被多个读操作访问，或者被一个写操作访问，但两者不能同时进行**。
 
 **锁的公平与非公平**
 
@@ -158,20 +158,20 @@ AbstractQueuedSynchronizer（AQS）使用一个volatile类型的int来作为同�
 
 ```java
 public final void acquire(int arg) {
-        if (!tryAcquire(arg) &&
-            acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
-            selfInterrupt();
-    }
+    if (!tryAcquire(arg) &&
+        acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
+        selfInterrupt();
+}
 ```
 
   共享锁获取锁，节点模式则为Node.SHARED
 
 ```java
-     private void doAcquireShared(int arg) {
-        final Node node = addWaiter(Node.SHARED);
-        boolean failed = true;
-        .....
-    }
+private void doAcquireShared(int arg) {
+    final Node node = addWaiter(Node.SHARED);
+    boolean failed = true;
+    .....
+}
 ```
 
  **对ConditionObject的认识**
@@ -294,7 +294,7 @@ class Ticket {
 
 - synchronized会自动释放锁,Lock必须要手动释放锁!如果不是释放锁,会产生死锁，ReentrantLock 和 synchronized 不一样，需要手动释放锁，所以使用 ReentrantLock的时候一定要**手动释放锁**，并且**加锁次数和释放次数要一样**
 
-- synchronized 线程1(获得锁,阻塞),线程2(等待); Lock锁就不一定会等待下去
+- 0synchronized 线程1(获得锁,阻塞),线程2(等待); Lock锁就不一定会等待下去
 
 - synchronized 可重入锁,不可以中断的,非公平的; Lock锁,可重入的,可以判断锁,非公平(可自己设置为公平锁);
 
@@ -782,7 +782,7 @@ class Phone3 {
 
 小结：
 
-- synchronized 方法锁的是调用者  new  this  具体的一个手机
+- synchronized 方法锁的是调用者   this  具体的一个手机
 - static 方法锁的是模板  Class  唯一的一个模板
 
 ## 6.集合类不安全
@@ -799,7 +799,9 @@ public class ListTest {
          * 解决方案
          * 1. 使用vector解决
          * 2. List<String> arrayList = Collections.synchronizedList(new ArrayList<>());
+         * synchronizedList 方法里面都有 synchronized 同步代码块
          * 3. List<String> arrayList = new CopyOnWriteArrayList<>();
+         * CopyOnWriteArrayList 使用 ReentrantLock 同步，同时使用 Arrays 工具类的 copyOf 接口复制数组
          */
         //copyOnWrite 写入时复制  COW 计算机程序设计领域的一种优化策略
         //多个线程调用的时候, list, 读取的时候固定的,写入的时候,可能会覆盖
@@ -831,8 +833,9 @@ public class SetTest {
 //        Set<String> set = new HashSet<>();
         //如何解决hashSet线程安全问题
         //1. Set<String> set = Collections.synchronizedSet(new HashSet<>());
+        // 方法里面都有 synchronized 同步代码块
         Set<String> set = new CopyOnWriteArraySet<>();
-
+		// CopyOnWriteArraySet 实际用的是 CopyOnWriteArrayList 来存储数据，只是在添加数据时会使用 CopyOnWriteArrayList 的 addIfAbsent 方法来检查是否已经存在元素
         for (int i = 0; i < 100; i++) {
             new Thread(() -> {
                 set.add(UUID.randomUUID().toString().substring(0, 5));
@@ -927,7 +930,7 @@ public class CallableTest {
         FutureTask futureTask = new FutureTask(thread); // 适配类
 
         new Thread(futureTask,"A").start();
-        new Thread(futureTask,"B").start(); // 结果会被缓存，效率高
+        new Thread(futureTask,"B").start(); // 只输出Acall()，结果会被缓存，效率高
 
         Integer o = (Integer) futureTask.get(); //这个get 方法可能会产生阻塞！把他放到最后
             // 或者使用异步通信来处理！
@@ -1197,12 +1200,6 @@ package com.xu.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @Author: win10
- * @Description:
- * @Date: Created in 21:22 2020/5/15
- * @Modified By:
- */
 public class testBlockingQueue {
     public static void main(String[] args) throws InterruptedException {
         test4();
@@ -1415,7 +1412,7 @@ public static ExecutorService newCachedThreadPool() {
 public ThreadPoolExecutor(int corePoolSize, //核心线程池大小
                               int maximumPoolSize,	//最大的线程池大小
                               long keepAliveTime,	// 超时了没有人调用就会释放
-                              TimeUnit unit,	//单位
+                              TimeUnit unit,	//时间单位
                               BlockingQueue<Runnable> workQueue,  //阻塞队列
                               ThreadFactory threadFactory,//线程工厂,创建线程的,一般不动
                               RejectedExecutionHandler handler) {//拒绝策略
@@ -1464,7 +1461,7 @@ public class testThreadPoolExecutor {
         );
 
         try {
-            // 最大承载：Deque + max  等待队列和最大线程之和
+            // 最大承载：Deque + max  等待队列容量和最大线程数之和
             // 超过 RejectedExecutionException  抛不抛出异常看拒绝策略
             for (int i = 0; i <12; i++) {
                 // 使用了线程池之后，使用线程池来创建线程
@@ -1513,8 +1510,9 @@ System.out.println(Runtime.getRuntime().availableProcessors());
 > **函数式接口：只有一个方法的接口**
 
 ~~~java
-@FunctionalInterface public interface Runnable {
-public abstract void run();
+@FunctionalInterface 
+public interface Runnable {
+	public abstract void run();
 }
 // 泛型、枚举、反射
 // lambda表达式、链式编程、函数式接口、Stream流式计算
@@ -1654,7 +1652,8 @@ public class Demo04 {
 ~~~java
 package com.kuang.stream;
 
-import java.util.Arrays; import java.util.List;
+import java.util.Arrays; 
+import java.util.List;
 
 /**
 *题目要求：一分钟内完成此题，只能用一行代码实现！
@@ -1682,7 +1681,7 @@ public class Test {
             .filter(u->{return u.getAge()>23;})
             .map(u->{return u.getName().toUpperCase();})
             .sorted((uu1,uu2)->{return uu2.compareTo(uu1);})
-            .limit(1)
+            .limit(1) //取前几个元素，数目可以大于元素总个数
             .forEach(System.out::println);
     }
 }
@@ -1882,7 +1881,7 @@ JMM: java内存模型,不存在的东西,概念!约定!
 
 线程 工作内存 主内存
 
-8种操作：
+8种操作：（这里的 write 和 store 交换位置）
 
 ![在这里插入图片描述](https://gitee.com/xudongyin/img/raw/master/img/20200620154037142.png)
 
@@ -2287,7 +2286,7 @@ public class Enum {
 }
 // enum 是一个什么？ 本身也是一个Class类
 public enum Instance {
-    ;
+    ;//注意这里有分号
     private  String name;
 
     Instance(){
@@ -2387,7 +2386,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class CASDemo {
 
-    // CAS	compareAndSet : 比较并交换！
+    // CAS	compareAndSwarp : 比较并交换！
     public static void main(String[] args) {
          // 期望、更新
         // public final boolean compareAndSet(int expect, int update)
@@ -2431,7 +2430,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class CASDemo {
 
-    // CAS	compareAndSet : 比较并交换！
+    // CAS	compareAndSwarp : 比较并交换！
     public static void main(String[] args) {
         AtomicInteger atomicInteger = new AtomicInteger(2020);
         // 期望、更新
@@ -2734,9 +2733,9 @@ public class KillLock implements Runnable {
 
 如何排查死锁
 
-1. 使用jps -l定位进程号
+1. 先使用jps -l定位进程号
    ![在这里插入图片描述](https://gitee.com/xudongyin/img/raw/master/img/20200620154417232.png)
-2. 使用 jstack 查看进程信息找到死锁问题
+2. 再使用 jstack 查看进程信息找到死锁问题
    <img src="https://gitee.com/xudongyin/img/raw/master/img/image-20200703174159947.png" alt="image-20200703174159947" style="zoom:150%;" />
 
 面试，工作中！ 排查问题：
