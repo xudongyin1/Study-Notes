@@ -1455,9 +1455,9 @@ public class testThreadPoolExecutor {
                 Executors.defaultThreadFactory(),  // 线程工厂，创建线程的，默认不用改
                 //队列满了，线程池满了，还有其他任务过来时拒绝策略
 //                new ThreadPoolExecutor.AbortPolicy()//满了，不处理，抛出异常
-//                new ThreadPoolExecutor.CallerRunsPolicy()//哪里来的哪里去处理
+//                new ThreadPoolExecutor.CallerRunsPolicy()//由调用线程（提交任务的线程）处理该任务
 //              new ThreadPoolExecutor.DiscardPolicy()//满了，丢掉任务，不抛出异常
-                new ThreadPoolExecutor.DiscardOldestPolicy()//满了，尝试和最早的线程竞争。不会抛出异常
+                new ThreadPoolExecutor.DiscardOldestPolicy()//抛弃队列中等待最久的任务，然后把当前任务加入队列中尝试再次提交当前任务
         );
 
         try {
@@ -1485,9 +1485,9 @@ public class testThreadPoolExecutor {
 ~~~java
 /**
  * new ThreadPoolExecutor.AbortPolicy() 超出最大处理线程抛出异常
- * new ThreadPoolExecutor.CallerRunsPolicy() 从哪个线程创建就由那个线程执行
- * new ThreadPoolExecutor.DiscardPolicy() 队列满了不会抛出异常
- * new ThreadPoolExecutor.DiscardOldestPolicy() 尝试去和第一个竞争，也不会抛出异常
+ * new ThreadPoolExecutor.CallerRunsPolicy() 哪个线程创建就由那个线程执行
+ * new ThreadPoolExecutor.DiscardPolicy() 队列满了，丢弃任务，不会抛出异常
+ * new ThreadPoolExecutor.DiscardOldestPolicy() 抛弃队列中等待最久的任务，然后把当前任务加入队列中尝试再次提交当前任务
  */
 ~~~
 
